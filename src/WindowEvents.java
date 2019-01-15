@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 
 public class WindowEvents extends JFrame implements WindowListener
 {
+  /* Variable that makes eclipse shut up */
   private static final long serialVersionUID = 1L;
 
   @Override
@@ -22,7 +23,8 @@ public class WindowEvents extends JFrame implements WindowListener
   public void windowClosed(WindowEvent αevent)
   {
   }
-
+  
+  /* When the exit button's clicked, this is called */
   @Override
   public void windowClosing(WindowEvent αevent)
   {

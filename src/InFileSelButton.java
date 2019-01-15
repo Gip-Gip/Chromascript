@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 
 public class InFileSelButton extends JFrame implements ActionListener
 {
+  /* Variable that makes eclipse shut up */
   private static final long serialVersionUID = 1L;
   
   /*When the button's clicked, call the GUI input file selection menu and
