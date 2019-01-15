@@ -13,18 +13,11 @@ public class InFileSelButton extends JFrame implements ActionListener
 {
   private static final long serialVersionUID = 1L;
   
+  /*When the button's clicked, call the GUI input file selection menu and
+   * update the file label */
   @Override
   public void actionPerformed(ActionEvent αevent)
   {
-    try
-    {
-      LocalStreams.closeIn();
-    }
-    catch (Exception ε)
-    {
-      GUI.errorMessage(ε);
-    }
-    
     GUI.inFileSel();
     
     WriteTab.updateFileLabel();
