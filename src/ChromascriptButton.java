@@ -18,14 +18,17 @@ public class ChromascriptButton extends JFrame implements ActionListener
   {
     try
     {
+      /* We keep calling file2pageFile until the entire input file is read */
       while(Chromascript.file2pageFile());
     }
     catch (Exception ε)
     {
       GUI.errorMessage(ε);
     }
+    
     try
     {
+      /* After all that close the output file */
       LocalStreams.closeOut();
     }
     catch (Exception ε)
