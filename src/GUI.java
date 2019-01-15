@@ -60,10 +60,10 @@ public class GUI
     return (Button)βsetSize(αbutton, αwidth, αheight);
   }
   
-  public static JComboBox setSize
-    (JComboBox αjComboBox, double αwidth, double αheight)
+  public static JComboBox<String> setSize
+    (JComboBox<String> αjComboBox, double αwidth, double αheight)
   {
-    return (JComboBox)βsetSize(αjComboBox, αwidth, αheight);
+    return (JComboBox<String>)βsetSize(αjComboBox, αwidth, αheight);
   }
   
   public static JProgressBar setSize
@@ -72,17 +72,22 @@ public class GUI
     return (JProgressBar)βsetSize(αjProgressBar, αwidth, αheight);
   }
   
-  public static void inFileSel()
+  private interface FileSelFunc
+  {
+    public void run(String αname, String αdir) throws Exception;
+  }
+  
+  public static void fileSel(FileSelFunc αfileSelFunc, int αdlgType)
   {
     FileDialog fileDialog = new FileDialog(GUI.getFrame());
     
-    fileDialog.setMode(FileDialog.LOAD);
+    fileDialog.setMode(αdlgType);
     fileDialog.setTitle(fileDialogTitle);
     fileDialog.setVisible(true);
     
     if(fileDialog.getFile() != null) try
     {
-      LocalStreams.setInFile(fileDialog.getFile(), fileDialog.getDirectory());
+      αfileSelFunc.run(fileDialog.getFile(), fileDialog.getDirectory());
     }
     catch(Exception ε)
     {
@@ -90,23 +95,22 @@ public class GUI
     }
   }
   
+  public static void inFileSel()
+  {
+    fileSel
+    (
+      (String αname, String αdir) -> LocalStreams.setInFile(αname, αdir),
+      FileDialog.LOAD
+    );
+  }
+  
   public static void outFileSel()
   {
-    FileDialog fileDialog = new FileDialog(GUI.getFrame());
-    
-    fileDialog.setFile("*.png");
-    fileDialog.setMode(FileDialog.SAVE);
-    fileDialog.setTitle(fileDialogTitle);
-    fileDialog.setVisible(true);
-    
-    if(fileDialog.getFile() != null) try
-    {
-      LocalStreams.setOutFile(fileDialog.getFile(), fileDialog.getDirectory());
-    }
-    catch(Exception ε)
-    {
-      GUI.errorMessage(ε);
-    }
+    fileSel
+    (
+      (String αname, String αdir) -> LocalStreams.setOutFile(αname, αdir),
+      FileDialog.SAVE
+    );
   }
   
   public static void start()
