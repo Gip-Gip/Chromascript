@@ -62,37 +62,37 @@ public class LocalStreams
   public static String getInFileName() throws Exception
   {
     if(inFileName != null) return inFileName;
-    else throw(new Exception("No file selected!"));
+    throw(new Exception("No file selected!"));
   }
   
   public static String getInFileDir() throws Exception
   {
     if(inFileDir != null) return inFileDir;
-    else throw(new Exception("No file selected"));
+    throw(new Exception("No file selected"));
   }
   
   public static long getInFileSize() throws Exception
   {
     if(inFileSize != -1) return inFileSize;
-    else throw(noFileSel);
+    throw(noFileSel);
   }
   
   public static String getOutFileName() throws Exception
   {
     if(outFileName != null) return outFileName;
-    else throw(noFileSel);
+    throw(noFileSel);
   }
   
   public static String getOutFileDir() throws Exception
   {
     if(outFileDir != null) return outFileDir;
-    else throw(noFileSel);
+    throw(noFileSel);
   }
   
   public static File getOutFile() throws Exception
   {
     if(outFile != null) return outFile;
-    else throw(noFileSel);
+    throw(noFileSel);
   }
   
   public static short readIn() throws Exception, EOF
