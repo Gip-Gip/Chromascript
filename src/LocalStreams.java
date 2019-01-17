@@ -9,15 +9,24 @@ import java.io.*;
 
 public class LocalStreams
 {
+  /* Input File */
   private static File inFile = null;
+  /* Input file's stream */
   private static FileInputStream inFileStream = null;
+  /* Output file */
   private static File outFile = null;
+  /* Output file's stream */
   private static FileOutputStream outFileStream = null;
   
+  /* Input file's name */
   private static String inFileName = null;
+  /* Input file's parent directory */
   private static String inFileDir = null;
+  /* Input file's size */
   private static long inFileSize = -1;
+  /* Output file's name */
   private static String outFileName = null;
+  /* Output file's parent directory */
   private static String outFileDir = null;
   
   public class EOF extends Throwable
@@ -123,7 +132,7 @@ public class LocalStreams
   
   public static void closeIn() throws Exception
   {
-    if(inFileStream != null) inFileStream.close();
+    if(inFile != null) inFileStream.close();
     inFile = null;
     inFileStream = null;
     inFileName = null;
@@ -133,7 +142,7 @@ public class LocalStreams
   
   public static void closeOut() throws Exception
   {
-    if(outFileStream != null) outFileStream.close();
+    if(outFile != null) outFileStream.close();
     outFile = null;
     outFileStream = null;
     outFileName = null;
