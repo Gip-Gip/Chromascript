@@ -147,6 +147,11 @@ public class WriteTab extends Panel
     );
   }
   
+  public static short getDPI()
+  {
+    return dpis[dpiSelDropdown.getSelectedIndex()];
+  }
+  
   public WriteTab()
   {
     /* Initialize all the panels with a flow layout */

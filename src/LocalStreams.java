@@ -86,6 +86,12 @@ public class LocalStreams
     throw(noFileSel);
   }
   
+  public static File getInFile() throws Exception
+  {
+    if(inFile != null) return inFile;
+    throw(noFileSel);
+  }
+  
   public static String getOutFileName() throws Exception
   {
     if(outFileName != null) return outFileName;

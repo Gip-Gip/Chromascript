@@ -1,7 +1,3 @@
-import java.awt.image.BufferedImage;
-
-import javax.imageio.ImageIO;
-
 /*
  * Chromascript.java of Chromascript,
  * the high-density paper-based data storage program
@@ -9,163 +5,169 @@ import javax.imageio.ImageIO;
  * by Charles Thompson, do not distribute!
  */
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+
 public class Chromascript
 {
-  public static Chromascript chromascript = new Chromascript();
+  private int id[] = new int[36];
+  private final byte idWidth = 18;
+  private final byte idHeight = 2;
+  private byte data[];
+  private int dataSize;
+  private int rgbData[];
+  private int width;
+  private int dataWidth;
+  private int height;
+  private int dataHeight;
+  private int lMargin;
+  private int rMargin;
+  private int tMargin;
+  private int bMargin;
+  private BufferedImage pageImage;
   
-  public static int repeatCount = 0;
-  public static String baseName = null;
-  
-  public static final int alignMark[] =
+  int[] getRgbData()
   {
-    0xFF000000, 0xFFFFFFFF, 0xFF000000,
-    0xFFFFFFFF, 0xFF000000, 0xFFFFFFFF,
-  };
-  
-  public static int[] toColors(byte αbytes[])
-  {
-    int colors[] = new int[αbytes.length];
-    
-    for(int ι = 0; ι < αbytes.length; ι++)
-    {
-      colors[ι] = 0xFF808080;
-      colors[ι] |= (αbytes[ι] & 0b11100000) << 15;
-      colors[ι] |= (αbytes[ι] & 0b00011100) << 10;
-      colors[ι] |= (αbytes[ι] & 0b00000011) << 5;
-    }
-    
-    return colors;
+    calcRgbData();
+    return rgbData;
   }
   
-  public static boolean file2pageFile()
+  BufferedImage getPageImage()
   {
-    boolean repeat = true;
-    BufferedImage bufferedImage = new BufferedImage
-    (
-      WriteTab.getPageWidth(),
-      WriteTab.getPageHeight(),
-      BufferedImage.TYPE_INT_RGB
-    );
-    byte readBuffer[] =
-      new byte[bufferedImage.getWidth() * (bufferedImage.getHeight() - 2)];    
-    byte header[] =
-      new byte[(bufferedImage.getWidth() - 6) * 2];
+    calcPageImage();
+    return pageImage;
+  }
+  
+  void setData(File αfile) throws Exception
+  {
+    calcDataSize();
+    FileInputStream inStream = new FileInputStream(αfile);
+    data = new byte[dataSize];
+    inStream.read(data);
+    inStream.close();
+  }
+  
+  void setWidth(int αwidth)
+  {
+    width = αwidth;
+  }
+  
+  void setHeight(int αheight)
+  {
+    height = αheight;
+  }
+  
+  void setLMargin(int αlMargin)
+  {
+    lMargin = αlMargin + 1;
+  }
+  
+  void setRMargin(int αrMargin)
+  {
+    rMargin = αrMargin + 1;
+  }
+  
+  void setTMargin(int αtMargin)
+  {
+    tMargin = αtMargin + idHeight + 1;
+  }
+  
+  void setBMargin(int αbMargin)
+  {
+    bMargin = αbMargin + 1;
+  }
+  
+  void setMargins(int αinchTenths, int αdpi)
+  {
+    int marginLength = αinchTenths * αdpi;
     
-
-    try
-    {
-      int ι = 0;
-      while(ι++ < 256)
-      {
-        header[ι] = (byte)ι;
-      }
-      for(byte character : LocalStreams.getInFileName().substring(8).getBytes())
-      {
-        header[ι++] = character;
-      }
-    }
-    catch(Exception ε)
-    {
-      GUI.errorMessage(ε);
-      
-      return false;
-    }
-
-    try
-    {
-      for(int ι = 0; ι < readBuffer.length; ι ++)
-        readBuffer[ι] = (byte)LocalStreams.readIn();
-    }
-    catch (LocalStreams.EOF ε)
-    {
-      repeat = false;
-    }
-    catch(Exception ε)
-    {
-      GUI.errorMessage(ε);
-      
-      return false;
-    }
+    marginLength /= 10;
     
-    try
+    setLMargin(marginLength);
+    setRMargin(marginLength);
+    setTMargin(marginLength);
+    setBMargin(marginLength);
+  }
+  
+  void calcDataSize()
+  {
+    calcDataWidth();
+    calcDataHeight();
+    dataSize = dataWidth * dataHeight;
+    dataSize /= 2;
+  }
+  
+  void calcRgbData()
+  {
+    rgbData = new int[data.length * 2];
+    
+    for(int ι = 0; ι < data.length; ι++)
     {
-      if(!LocalStreams.isOutOpen())
-      {
-        GUI.outFileSel();
-        baseName = LocalStreams.getOutFileName();
-        if(!LocalStreams.getOutFileName().endsWith(".png"))
-        {
-          String newOutFileName = baseName + ".png";
-          String outFileDir = LocalStreams.getOutFileDir();
-          LocalStreams.closeOut();
-          LocalStreams.setOutFile(newOutFileName, outFileDir);
-          baseName = LocalStreams.getOutFileName();
-        }
-      }
-      else
-      {
-        repeatCount ++;
-        String newOutFileName = repeatCount + baseName;
-        String outFileDir = LocalStreams.getOutFileDir();
-        
-        LocalStreams.closeOut();
-        LocalStreams.setOutFile(newOutFileName, outFileDir);
-      }
-      bufferedImage.setRGB
-      (
-          0,
-          2,
-          bufferedImage.getWidth(),
-          bufferedImage.getHeight() - 2,
-          toColors(readBuffer),
-          0,
-          bufferedImage.getWidth()
-      );
+      rgbData[ι*2] = 0xFF3F3F3F;
+      rgbData[ι*2] |= ((data[ι] & 0b10000000) > 0 ? 0 : 0x00400000);
+      rgbData[ι*2] |= ((data[ι] & 0b01000000) > 0 ? 0 : 0x00004000);
+      rgbData[ι*2] |= ((data[ι] & 0b00100000) > 0 ? 0 : 0x00000040);
+      rgbData[ι*2] |= ((data[ι] & 0b00010000) > 0 ? 0 : 0x00808080);
       
-      bufferedImage.setRGB
-      (
-        0,
-        0,
-        3,
-        2,
-        alignMark,
-        0,
-        3
-      );
-      
-      bufferedImage.setRGB
-      (
-        bufferedImage.getWidth() - 3,
-        0,
-        3,
-        2,
-        alignMark,
-        0,
-        3
-      );
-      
-      bufferedImage.setRGB
-      (
-        3,
-        0,
-        bufferedImage.getWidth() - 6,
-        2,
-        toColors(header),
-        0,
-        bufferedImage.getWidth() - 6
-      );
-      
-      ImageIO.write(bufferedImage, "PNG", LocalStreams.getOutFile());
+      rgbData[ι*2+1] = 0xFF3F3F3F;
+      rgbData[ι*2+1] |= ((data[ι] & 0b00001000) > 0 ? 0 : 0x00400000);
+      rgbData[ι*2+1] |= ((data[ι] & 0b00000100) > 0 ? 0 : 0x00004000);
+      rgbData[ι*2+1] |= ((data[ι] & 0b00000010) > 0 ? 0 : 0x00000040);
+      rgbData[ι*2+1] |= ((data[ι] & 0b00000001) > 0 ? 0 : 0x00808080);
     }
-    catch (Exception ε)
+  }
+  
+  void calcDataWidth()
+  {
+    dataWidth = width - lMargin - rMargin;
+  }
+  
+  void calcDataHeight()
+  {
+    dataHeight = height - tMargin - bMargin;
+  }
+  
+  void calcId()
+  {
+    int ι = 0;
+    
+    id[ι] = 0xFF000000;
+    
+    while((++ι) < 17)
     {
-      GUI.errorMessage(ε);
-      
-      return false;
+      id[ι] = 0xFF3F3F3F;
+      id[ι] |= ((16-ι & 0b1000) > 0 ? 0 : 0x00400000);
+      id[ι] |= ((16-ι & 0b0100) > 0 ? 0 : 0x00004000);
+      id[ι] |= ((16-ι & 0b0010) > 0 ? 0 : 0x00000040);
+      id[ι] |= ((16-ι & 0b0001) > 0 ? 0 : 0x00808080);
     }
     
-    if(!repeat) repeatCount = 0;
+    id[ι] = 0xFF000000;
     
-    return repeat;
+    while((++ι) < id.length) id[ι] = 0xFFFFFFFF;
+  }
+  
+  void calcPageImage()
+  {
+    pageImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    
+    calcRgbData();
+    
+    for(int x = 0; x < width; x++)
+    {
+      for(int y = 0; y < height; y++)
+      {
+        pageImage.setRGB(x, y, 0xFFFFFFFF);
+      }
+    }
+    
+    calcId();
+    
+    pageImage.setRGB
+      (lMargin, tMargin - idHeight, idWidth, idHeight, id, 0, idWidth);
+    
+    pageImage.setRGB
+      (lMargin, tMargin, dataWidth, dataHeight, rgbData, 0, dataWidth);
   }
 }

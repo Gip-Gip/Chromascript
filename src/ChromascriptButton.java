@@ -7,6 +7,8 @@
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 public class ChromascriptButton extends JFrame implements ActionListener
@@ -18,8 +20,14 @@ public class ChromascriptButton extends JFrame implements ActionListener
   {
     try
     {
-      /* We keep calling file2pageFile until the entire input file is read */
-      while(Chromascript.file2pageFile());
+      Chromascript chromascript = new Chromascript();
+      chromascript.setWidth(WriteTab.getPageWidth());
+      chromascript.setHeight(WriteTab.getPageHeight());
+      chromascript.setMargins(5, WriteTab.getDPI());
+      chromascript.setData(LocalStreams.getInFile());
+      GUI.outFileSel();
+      ImageIO.write
+        (chromascript.getPageImage(), "PNG", LocalStreams.getOutFile());
     }
     catch (Exception ε)
     {

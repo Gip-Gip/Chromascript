@@ -30,6 +30,7 @@ public class GUI
   
   public static void errorMessage(Exception αε)
   {
+    αε.printStackTrace();
     System.err.println("Error! " + αε.toString());
     JOptionPane.showMessageDialog
       (null, αε.toString(), "Error!", JOptionPane.ERROR_MESSAGE);
