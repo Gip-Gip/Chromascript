@@ -54,6 +54,38 @@ public class Chromascript
     }
   }
   
+  private class BrightnessTracker
+  {
+    private int darkest;
+    private int lightest;
+    
+    public BrightnessTracker()
+    {
+      darkest = 0xFFFFFF;
+      lightest = 0x000000;
+    }
+    
+    private int meanBrightness(int rgb)
+    {
+      int brightness = (rgb & 0xFF) + ((rgb >>= 8) & 0xFF) + ((rgb >>= 8) & 0xFF);
+      brightness /= 3;
+      
+      return brightness;
+    }
+    
+    public void updateDarkest(int αargb)
+    {
+      αargb &= 0x00FFFFFF;
+      darkest = Math.min(darkest, meanBrightness(αargb));
+    }
+    
+    public void updateLightest(int αargb)
+    {
+      αargb &= 0x00FFFFFF;
+      lightest = Math.max(lightest, meanBrightness(αargb));
+    }
+  }
+  
   byte[] getData()
   {
     calcData();
@@ -128,65 +160,19 @@ public class Chromascript
     setBMargin(marginLength);
   }
   
-  private int meanBrightness(int rgb)
-  {
-    int brightness = (rgb & 0xFF) + ((rgb >>= 8) & 0xFF) + ((rgb >>= 8) & 0xFF);
-    brightness /= 3;
-    
-    return brightness;
-  }
-  
   void calcData()
   {
     IdSquare idOne = new IdSquare();
     IdSquare idTwo = new IdSquare();
-    
-    int darkest = 0xFFFFFF;
-    int lightest = 0x000000;
-    int range;
+    BrightnessTracker bTracker = new BrightnessTracker();
     
     for(int y = 0; y < pageImage.getHeight(); y++)
     {
       for(int x = 0; x < pageImage.getWidth(); x++)
       {
-        darkest = Math.min(darkest, meanBrightness(pageImage.getRGB(x, y) & 0xFFFFFF));
-        lightest = Math.max(lightest, meanBrightness(pageImage.getRGB(x, y) & 0xFFFFFF));
+        bTracker.updateDarkest(pageImage.getRGB(x, y));
       }
     }
-    
-    range = lightest - darkest;
-    
-    for(int y = 0; y < pageImage.getHeight(); y++)
-    {
-      for(int x = 0; x < pageImage.getWidth(); x++)
-      {
-        if((meanBrightness(pageImage.getRGB(x, y) & 0xFFFFFF)) < (range / 4 + darkest))
-        {
-          idOne.pointAX = x;
-          idOne.pointAY = y;
-        }
-      }
-    }
-    
-    idOne.pointBX = idOne.pointAX;
-    idOne.pointBY = idOne.pointAY;
-    
-    while((meanBrightness(pageImage.getRGB(idOne.pointBX, idOne.pointBY) & 0xFFFFFF)) < (range / 4 + darkest))
-    {
-      if((meanBrightness(pageImage.getRGB(idOne.pointBX + 1, idOne.pointBY) & 0xFFFFFF)) < (range / 4 + darkest))
-        idOne.pointBX++;
-      
-      else if((meanBrightness(pageImage.getRGB(idOne.pointBX, idOne.pointBY + 1) & 0xFFFFFF)) < (range / 4 + darkest))
-        idOne.pointBY++;
-      
-      else
-      {
-        idOne.pointBX ++;
-        idOne.pointBY ++;
-      }
-    }
-    
-    System.out.print(idOne);
   }
   
   void calcDataSize()
