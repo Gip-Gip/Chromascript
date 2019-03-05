@@ -35,6 +35,7 @@ public class Chromascript
     public int pointAY;
     public int pointBX;
     public int pointBY;
+    public boolean finished = false;
     
     public double getDiagonal()
     {
@@ -58,19 +59,25 @@ public class Chromascript
   {
     private int darkest;
     private int lightest;
-    
+        
     public BrightnessTracker()
     {
       darkest = 0xFFFFFF;
       lightest = 0x000000;
     }
-    
+     
     private int meanBrightness(int rgb)
     {
       int brightness = (rgb & 0xFF) + ((rgb >>= 8) & 0xFF) + ((rgb >>= 8) & 0xFF);
       brightness /= 3;
       
       return brightness;
+    }
+    
+    public boolean isDark(int αargb)
+    {
+      αargb &= 0x00FFFFFF;
+      return αargb < (lightest - darkest) / 4 + darkest;
     }
     
     public void updateDarkest(int αargb)
@@ -162,8 +169,8 @@ public class Chromascript
   
   void calcData()
   {
-    IdSquare idOne = new IdSquare();
-    IdSquare idTwo = new IdSquare();
+    IdSquare idOne = null;
+    IdSquare idTwo = null;
     BrightnessTracker bTracker = new BrightnessTracker();
     
     for(int y = 0; y < pageImage.getHeight(); y++)
@@ -171,8 +178,74 @@ public class Chromascript
       for(int x = 0; x < pageImage.getWidth(); x++)
       {
         bTracker.updateDarkest(pageImage.getRGB(x, y));
+        bTracker.updateLightest(pageImage.getRGB(x, y));
       }
     }
+    
+    for(int y = 0; y < pageImage.getHeight() && idOne == null; y++)
+    {
+      for(int x = 0; x < pageImage.getWidth() && idOne == null; x++)
+      {
+        if(bTracker.isDark(pageImage.getRGB(x, y)))
+        {
+          idOne = new IdSquare();
+          idOne.pointAX = x;
+          idOne.pointBX = x;
+          idOne.pointAY = y;
+          idOne.pointBY = y;
+        }
+      }
+    }
+    
+    for(int y = pageImage.getHeight() - 1; y >= 0 && idTwo == null; y--)
+    {
+      for(int x = pageImage.getWidth() - 1; x >= 0  && idTwo == null; x--)
+      {
+        if(bTracker.isDark(pageImage.getRGB(x, y)))
+        {
+          idTwo = new IdSquare();
+          idTwo.pointAX = x + 1;
+          idTwo.pointBX = x;
+          idTwo.pointAY = y + 1;
+          idTwo.pointBY = y;
+        }
+      }
+    }
+    
+    for(int y = idOne.pointBY; y < pageImage.getHeight() && bTracker.isDark(pageImage.getRGB(idOne.pointBX, y)); y++)
+    {
+      for(int x = idOne.pointBX; !bTracker.isDark(pageImage.getRGB(x, y + 1)) && bTracker.isDark(pageImage.getRGB(x, y));x --)
+        idOne.pointBX = x;
+      
+      if(!bTracker.isDark(pageImage.getRGB(idOne.pointBX, y + 1)))
+      {
+        for(int x = idOne.pointBX; !bTracker.isDark(pageImage.getRGB(x, y + 1)) && bTracker.isDark(pageImage.getRGB(x, y));x ++)
+          idOne.pointBX = x;
+      }
+      
+      
+      idOne.pointBY = y;
+    }
+    
+    idOne.pointBX ++;
+    idOne.pointBY ++;
+    
+    for(int y = idTwo.pointBY; y < pageImage.getHeight() && bTracker.isDark(pageImage.getRGB(idTwo.pointBX, y)); y--)
+    {
+      for(int x = idTwo.pointBX; !bTracker.isDark(pageImage.getRGB(x, y - 1)) && bTracker.isDark(pageImage.getRGB(x, y));x ++)
+        idTwo.pointBX = x;
+      
+      if(!bTracker.isDark(pageImage.getRGB(idTwo.pointBX, y - 1)))
+      {
+        for(int x = idTwo.pointBX; !bTracker.isDark(pageImage.getRGB(x, y - 1)) && bTracker.isDark(pageImage.getRGB(x, y));x --)
+          idTwo.pointBX = x;
+      }
+      
+      idTwo.pointBY = y;
+    }
+    
+    System.out.println(idOne);
+    System.out.println(idTwo);
   }
   
   void calcDataSize()

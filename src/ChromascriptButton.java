@@ -21,13 +21,16 @@ public class ChromascriptButton extends JFrame implements ActionListener
     try
     {
       Chromascript chromascript = new Chromascript();
-      chromascript.setWidth(WriteTab.getPageWidth());
+      /*chromascript.setWidth(WriteTab.getPageWidth());
       chromascript.setHeight(WriteTab.getPageHeight());
       chromascript.setMargins(5, WriteTab.getDPI());
       chromascript.setData(LocalStreams.getInFile());
       GUI.outFileSel();
       ImageIO.write
-        (chromascript.getPageImage(), "PNG", LocalStreams.getOutFile());
+        (chromascript.getPageImage(), "PNG", LocalStreams.getOutFile());*/
+      
+      chromascript.setPageImage(LocalStreams.getInFile());
+      chromascript.calcData();
     }
     catch (Exception ε)
     {
