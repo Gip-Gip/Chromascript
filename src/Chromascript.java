@@ -99,6 +99,9 @@ public class Chromascript
     private int originX;
     private int originY;
     
+    private double currentX;
+    private double currentY;
+    
     public CoordCorrector(int pointAX, int pointAY, int pointBX, int pointBY)
     {
       slope = (pointBY - pointAY) / (pointBX - pointAX);
@@ -106,14 +109,20 @@ public class Chromascript
       originY = pointAY;
     }
     
-    public double correctX(double x, double y)
+    public void setXY(double x, double y)
     {
-      return (y * slope) + x - originX;
+      currentX = x + originX;
+      currentY = y + originY;
     }
     
-    public double correctY(double x, double y)
+    public double correctX()
     {
-      return (x * slope) + y - originY;
+      return (currentY * slope) + currentX;
+    }
+    
+    public double correctY()
+    {
+      return (currentX * slope) + currentY;
     }
   }
   
@@ -272,6 +281,9 @@ public class Chromascript
       
       idTwo.pointBY = y;
     }
+    
+    CoordCorrector coordCorrector = new CoordCorrector(idOne.pointAX, idOne.pointAY, idTwo.pointAX, idTwo.pointAY);
+    
     
     
     System.out.println(idOne);
