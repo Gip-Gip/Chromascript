@@ -93,6 +93,30 @@ public class Chromascript
     }
   }
   
+  private class CoordCorrector
+  {
+    private double slope;
+    private int originX;
+    private int originY;
+    
+    public CoordCorrector(int pointAX, int pointAY, int pointBX, int pointBY)
+    {
+      slope = (pointBY - pointAY) / (pointBX - pointAX);
+      originX = pointAX;
+      originY = pointAY;
+    }
+    
+    public double correctX(double x, double y)
+    {
+      return (y * slope) + x - originX;
+    }
+    
+    public double correctY(double x, double y)
+    {
+      return (x * slope) + y - originY;
+    }
+  }
+  
   byte[] getData()
   {
     calcData();
@@ -173,6 +197,7 @@ public class Chromascript
     IdSquare idTwo = null;
     BrightnessTracker bTracker = new BrightnessTracker();
     
+    /* Get the brightness range in the image */
     for(int y = 0; y < pageImage.getHeight(); y++)
     {
       for(int x = 0; x < pageImage.getWidth(); x++)
@@ -182,6 +207,7 @@ public class Chromascript
       }
     }
     
+    /* Find the first point in the first ID square*/
     for(int y = 0; y < pageImage.getHeight() && idOne == null; y++)
     {
       for(int x = 0; x < pageImage.getWidth() && idOne == null; x++)
@@ -197,6 +223,7 @@ public class Chromascript
       }
     }
     
+    /* Find the first point in the second ID square */
     for(int y = pageImage.getHeight() - 1; y >= 0 && idTwo == null; y--)
     {
       for(int x = pageImage.getWidth() - 1; x >= 0  && idTwo == null; x--)
@@ -212,6 +239,7 @@ public class Chromascript
       }
     }
     
+    /* Find the second point in the first ID square */
     for(int y = idOne.pointBY; y < pageImage.getHeight() && bTracker.isDark(pageImage.getRGB(idOne.pointBX, y)); y++)
     {
       for(int x = idOne.pointBX; !bTracker.isDark(pageImage.getRGB(x, y + 1)) && bTracker.isDark(pageImage.getRGB(x, y));x --)
@@ -230,6 +258,7 @@ public class Chromascript
     idOne.pointBX ++;
     idOne.pointBY ++;
     
+    /* Find the second point in the second ID square */
     for(int y = idTwo.pointBY; y < pageImage.getHeight() && bTracker.isDark(pageImage.getRGB(idTwo.pointBX, y)); y--)
     {
       for(int x = idTwo.pointBX; !bTracker.isDark(pageImage.getRGB(x, y - 1)) && bTracker.isDark(pageImage.getRGB(x, y));x ++)
@@ -243,6 +272,7 @@ public class Chromascript
       
       idTwo.pointBY = y;
     }
+    
     
     System.out.println(idOne);
     System.out.println(idTwo);
