@@ -236,6 +236,12 @@ public class Chromascript
     dataLength = αfile.length();
     data = new byte[dataSize];
     inStream.read(data);
+    
+    for(int i = (int) (αfile.length() - 1); i < data.length; i ++)
+    {
+      data[i] = (byte) 0xFF;
+    }
+    
     inStream.close();
   }
   

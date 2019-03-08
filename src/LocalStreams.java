@@ -130,10 +130,10 @@ public class LocalStreams
     return (outFile != null);
   }
   
-  public static void writeOut(byte αbyte) throws Exception
+  public static void writeOut(byte[] αbytes) throws Exception
   {
     if(outFileStream == null) throw(noFileSel);
-    outFileStream.write(αbyte);
+    outFileStream.write(αbytes);
   }
   
   public static void closeIn() throws Exception

@@ -21,6 +21,16 @@ public class ReadButton extends JFrame implements ActionListener
     try
     {
       Chromascript chromascript = new Chromascript();
+      
+      chromascript.setPageImage(LocalStreams.getInFile());
+      GUI.outFileSel();
+      
+      for(byte i : chromascript.getData())
+      {
+        System.out.print((char)i);
+      }
+      
+      LocalStreams.writeOut(chromascript.getData());
     }
     catch (Exception ε)
     {
