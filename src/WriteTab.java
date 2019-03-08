@@ -121,7 +121,7 @@ public class WriteTab extends Panel
     }
     catch(Exception ε)
     {
-      GUI.errorMessage(ε);
+      
     }
   }
   

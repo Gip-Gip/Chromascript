@@ -1,0 +1,40 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+
+/*
+ * ReadButton.java of Chromascript,
+ * the high-density paper-based data storage program
+ *
+ * by Charles Thompson, do not distribute!
+ */
+
+public class ReadButton extends JFrame implements ActionListener
+{
+  private static final long serialVersionUID = 1L;
+
+  @Override
+  public void actionPerformed(ActionEvent αevent)
+  {
+    try
+    {
+      Chromascript chromascript = new Chromascript();
+    }
+    catch (Exception ε)
+    {
+      GUI.errorMessage(ε);
+    }
+    
+    try
+    {
+      /* After all that close the output file */
+      LocalStreams.closeOut();
+    }
+    catch (Exception ε)
+    {
+      GUI.errorMessage(ε);
+    }
+  }
+}

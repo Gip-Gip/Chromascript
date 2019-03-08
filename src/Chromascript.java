@@ -28,6 +28,7 @@ public class Chromascript
   private int tMargin;
   private int bMargin;
   private BufferedImage pageImage;
+  private String name;
   
   private class IdSquare
   {
@@ -124,6 +125,91 @@ public class Chromascript
     {
       return (currentX * slope) + currentY;
     }
+  }
+  
+  private class Decoder
+  {
+    private CoordCorrector coordCorrector;
+    double size;
+    int bitColorValues[] = new int[16];
+    
+    public Decoder(CoordCorrector αcoordCorrector, double αsize)
+    {
+      coordCorrector = αcoordCorrector;
+      
+      size = αsize;
+    }
+    
+    public int getAvgColor(int αx, int αy)
+    {
+      int r = 0, g = 0, b = 0;
+      
+      for(int y = 0; y < size; y ++)
+      {
+        for(int x = 0; x < size; x ++)
+        {
+          coordCorrector.setXY(αx * size + x, αy * size + y);
+          int currColor = pageImage.getRGB
+            ((int)Math.round(coordCorrector.correctX()), (int)Math.round(coordCorrector.correctY()));
+          
+          r += currColor & 0xFF0000;
+          g += currColor & 0xFF00;
+          b += currColor & 0xFF;
+          
+          if(x > 0 || y > 0)
+          {
+            r /= 2;
+            g /= 2;
+            b /= 2;
+          }
+        }
+      }
+      
+      return r | g | b;
+    }
+    
+    public void setColorValue(int bitValue, int color)
+    {
+      bitColorValues[bitValue] = color;
+    }
+    
+    public int colorDiff(int colora, int colorb)
+    {
+      int r, g, b;
+      
+      b = Math.abs((colora & 0xFF) - (colorb & 0xFF));
+      g = Math.abs(((colora >>= 8) & 0xFF) - ((colorb >>= 8) & 0xFF));
+      r = Math.abs(((colora >>= 8) & 0xFF) - ((colorb >>= 8) & 0xFF));
+      
+      return r + g + b;
+    }
+    
+    public int getNibble(int x, int y)
+    {
+      int color = getAvgColor(x, y);
+      int lowestColorDiff = 0xFFFFFF;
+      int val = 0;
+      
+      for(int i = 0; i < bitColorValues.length; i ++)
+      {
+        if((lowestColorDiff) > (lowestColorDiff = Math.min(colorDiff(color, bitColorValues[i]), lowestColorDiff)))
+        {
+          val = i;
+        }
+      }
+      
+      return (byte) val;
+    }
+    
+    public int getByte(int x, int y)
+    {
+      return (getNibble(x, y) << 4) | getNibble(x + 1, y);
+    }
+  }
+  
+  String getName()
+  {
+    return name;
   }
   
   byte[] getData()
@@ -283,11 +369,45 @@ public class Chromascript
     }
     
     CoordCorrector coordCorrector = new CoordCorrector(idOne.pointAX, idOne.pointAY, idTwo.pointAX, idTwo.pointAY);
+    Decoder decoder = new Decoder(coordCorrector, idOne.getSide());
     
+    /* Get colors */
+    for(int x = 0; x < 16; x ++)
+    {
+      decoder.setColorValue(x, decoder.getAvgColor(x + 1, 0));
+    }
     
+    String fileSize = new String();
     
-    System.out.println(idOne);
-    System.out.println(idTwo);
+    /* Get file size */
+    for(int x = 17; decoder.getByte(x, 0) > 0; x += 2)
+    {
+      fileSize += (char)decoder.getByte(x, 0);
+    }
+    
+    String fileName = new String();
+    
+    /* Get file name */
+    for(int x = 19 + (fileSize.length()* 2); decoder.getByte(x, 0) > 0; x += 2)
+    {
+      fileName += (char)decoder.getByte(x, 0);
+    }
+    
+    /* Get data */
+    
+    data = new byte[Integer.parseInt(fileSize, 16)];
+    width = (int)Math.round(Math.hypot(idOne.pointAX - idTwo.pointAX, idOne.pointAY - idTwo.pointAY));
+    
+    int i = 0;
+    for(int y = 2; i < data.length; y ++)
+    {
+      for(int x = 0; i < data.length && x < width; x += 2)
+      {
+        data[i++] = (byte)decoder.getByte(x, y);
+      }
+    }
+    
+    name = fileName;
   }
   
   void calcDataSize()
@@ -305,16 +425,16 @@ public class Chromascript
     for(int ι = 0; ι < data.length; ι++)
     {
       rgbData[ι*2] = 0xFF3F3F3F;
-      rgbData[ι*2] |= ((data[ι] & 0b10000000) > 0 ? 0 : 0x00400000);
-      rgbData[ι*2] |= ((data[ι] & 0b01000000) > 0 ? 0 : 0x00004000);
-      rgbData[ι*2] |= ((data[ι] & 0b00100000) > 0 ? 0 : 0x00000040);
-      rgbData[ι*2] |= ((data[ι] & 0b00010000) > 0 ? 0 : 0x00808080);
+      rgbData[ι*2] |= ((data[ι] & 0b10000000) > 0 ? 0x00400000 : 0);
+      rgbData[ι*2] |= ((data[ι] & 0b01000000) > 0 ? 0x00004000 : 0);
+      rgbData[ι*2] |= ((data[ι] & 0b00100000) > 0 ? 0x00000040 : 0);
+      rgbData[ι*2] |= ((data[ι] & 0b00010000) > 0 ? 0x00808080 : 0);
       
       rgbData[ι*2+1] = 0xFF3F3F3F;
-      rgbData[ι*2+1] |= ((data[ι] & 0b00001000) > 0 ? 0 : 0x00400000);
-      rgbData[ι*2+1] |= ((data[ι] & 0b00000100) > 0 ? 0 : 0x00004000);
-      rgbData[ι*2+1] |= ((data[ι] & 0b00000010) > 0 ? 0 : 0x00000040);
-      rgbData[ι*2+1] |= ((data[ι] & 0b00000001) > 0 ? 0 : 0x00808080);
+      rgbData[ι*2+1] |= ((data[ι] & 0b00001000) > 0 ? 0x00400000 : 0);
+      rgbData[ι*2+1] |= ((data[ι] & 0b00000100) > 0 ? 0x00004000 : 0);
+      rgbData[ι*2+1] |= ((data[ι] & 0b00000010) > 0 ? 0x00000040 : 0);
+      rgbData[ι*2+1] |= ((data[ι] & 0b00000001) > 0 ? 0x00808080 : 0);
     }
     
     return rgbData;
@@ -334,9 +454,11 @@ public class Chromascript
   {
     int ι = 0;
     int fileSize[] = 
-        mkRgbData((Long.toString(dataLength) + "\0").getBytes());
+        mkRgbData((Long.toString(dataLength, 16) + "\0").getBytes());
     int fileName[] =
         mkRgbData((LocalStreams.getInFileName() + "\0").getBytes());
+    
+    System.out.println(Long.toHexString(dataLength));
     
     idWidth = dataWidth;
     id = new int[idWidth * idHeight];
@@ -346,10 +468,10 @@ public class Chromascript
     while((++ι) < 17)
     {
       id[ι] = 0xFF3F3F3F;
-      id[ι] |= ((16-ι & 0b1000) > 0 ? 0 : 0x00400000);
-      id[ι] |= ((16-ι & 0b0100) > 0 ? 0 : 0x00004000);
-      id[ι] |= ((16-ι & 0b0010) > 0 ? 0 : 0x00000040);
-      id[ι] |= ((16-ι & 0b0001) > 0 ? 0 : 0x00808080);
+      id[ι] |= ((ι-1 & 0b1000) > 0 ? 0x00400000 : 0);
+      id[ι] |= ((ι-1 & 0b0100) > 0 ? 0x00004000 : 0);
+      id[ι] |= ((ι-1 & 0b0010) > 0 ? 0x00000040 : 0);
+      id[ι] |= ((ι-1 & 0b0001) > 0 ? 0x00808080 : 0);
     }
     
     for(int character : fileSize)
@@ -390,7 +512,5 @@ public class Chromascript
     
     pageImage.setRGB
       (lMargin, tMargin, dataWidth, dataHeight, getRgbData(), 0, dataWidth);
-    
-    calcData();
   }
 }

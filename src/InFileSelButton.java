@@ -19,6 +19,7 @@ public class InFileSelButton extends JFrame implements ActionListener
   {
     GUI.inFileSel();
     
+    ReadTab.updateFileLabel();
     WriteTab.updateFileLabel();
   }
 }
