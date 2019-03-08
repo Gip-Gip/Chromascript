@@ -85,7 +85,7 @@ public class ReadTab extends Panel
     
     /* Initialize the Chromascript panel/button */
     chromascriptButton = GUI.setSize(chromascriptButton, 15, 0.8);
-    chromascriptButton.addActionListener(new ChromascriptButton());
+    chromascriptButton.addActionListener(new ReadButton());
     
     chromascriptPanel = GUI.setSize(chromascriptPanel, 16, 1);
     chromascriptPanel.add(chromascriptButton);

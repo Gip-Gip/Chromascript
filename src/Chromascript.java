@@ -237,7 +237,7 @@ public class Chromascript
     data = new byte[dataSize];
     inStream.read(data);
     
-    for(int i = (int) (αfile.length() - 1); i < data.length; i ++)
+    for(int i = (int) (αfile.length()); i < data.length; i ++)
     {
       data[i] = (byte) 0xFF;
     }
@@ -332,10 +332,10 @@ public class Chromascript
         if(bTracker.isDark(pageImage.getRGB(x, y)))
         {
           idTwo = new IdSquare();
-          idTwo.pointAX = x + 1;
-          idTwo.pointBX = x;
-          idTwo.pointAY = y + 1;
-          idTwo.pointBY = y;
+          idTwo.pointAX = x;
+          idTwo.pointBX = x + 1;
+          idTwo.pointAY = y;
+          idTwo.pointBY = y + 1;
         }
       }
     }
@@ -360,18 +360,18 @@ public class Chromascript
     idOne.pointBY ++;
     
     /* Find the second point in the second ID square */
-    for(int y = idTwo.pointBY; y < pageImage.getHeight() && bTracker.isDark(pageImage.getRGB(idTwo.pointBX, y)); y--)
+    for(int y = idTwo.pointAY; y < pageImage.getHeight() && bTracker.isDark(pageImage.getRGB(idTwo.pointAX, y)); y--)
     {
-      for(int x = idTwo.pointBX; !bTracker.isDark(pageImage.getRGB(x, y - 1)) && bTracker.isDark(pageImage.getRGB(x, y));x ++)
-        idTwo.pointBX = x;
+      for(int x = idTwo.pointAX; !bTracker.isDark(pageImage.getRGB(x, y - 1)) && bTracker.isDark(pageImage.getRGB(x, y));x ++)
+        idTwo.pointAX = x;
       
-      if(!bTracker.isDark(pageImage.getRGB(idTwo.pointBX, y - 1)))
+      if(!bTracker.isDark(pageImage.getRGB(idTwo.pointAX, y - 1)))
       {
-        for(int x = idTwo.pointBX; !bTracker.isDark(pageImage.getRGB(x, y - 1)) && bTracker.isDark(pageImage.getRGB(x, y));x --)
-          idTwo.pointBX = x;
+        for(int x = idTwo.pointAX; !bTracker.isDark(pageImage.getRGB(x, y - 1)) && bTracker.isDark(pageImage.getRGB(x, y));x --)
+          idTwo.pointAX = x;
       }
       
-      idTwo.pointBY = y;
+      idTwo.pointAY = y;
     }
     
     CoordCorrector coordCorrector = new CoordCorrector(idOne.pointAX, idOne.pointAY, idTwo.pointAX, idTwo.pointAY);
@@ -401,15 +401,17 @@ public class Chromascript
     
     /* Get data */
     
-    data = new byte[Integer.parseInt(fileSize, 16)];
-    width = (int)Math.round(Math.hypot(idOne.pointAX - idTwo.pointAX, idOne.pointAY - idTwo.pointAY));
+    dataSize = Integer.parseInt(fileSize, 16);
+    data = new byte[dataSize];
+    width = (int)Math.round(Math.hypot(idOne.pointAX - idTwo.pointAX, idOne.pointAY - idTwo.pointAY)) / (int)idOne.getSide() + 1;
     
     int i = 0;
     for(int y = 2; i < data.length; y ++)
     {
       for(int x = 0; i < data.length && x < width; x += 2)
       {
-        data[i++] = (byte)decoder.getByte(x, y);
+        data[i] = (byte)decoder.getByte(x, y);
+        i ++;
       }
     }
     
@@ -460,11 +462,9 @@ public class Chromascript
   {
     int ι = 0;
     int fileSize[] = 
-        mkRgbData((Long.toString(dataLength, 16) + "\0").getBytes());
+        mkRgbData((Long.toString(LocalStreams.getInFileSize(), 16) + "\0").getBytes());
     int fileName[] =
         mkRgbData((LocalStreams.getInFileName() + "\0").getBytes());
-    
-    System.out.println(Long.toHexString(dataLength));
     
     idWidth = dataWidth;
     id = new int[idWidth * idHeight];

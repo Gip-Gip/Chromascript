@@ -126,7 +126,7 @@ public class GUI
     frame.setSize(frameSize);
     frame.add(tabPane);
     
-    tabPane.addTab(WriteTab.getTitle(), new WriteTab());
+    //tabPane.addTab(WriteTab.getTitle(), new WriteTab());
     tabPane.addTab(ReadTab.getTitle(), new ReadTab());
     
     frame.setResizable(false);
