@@ -10,8 +10,6 @@ import java.awt.FlowLayout;
 import java.awt.Label;
 import java.awt.Panel;
 
-import javax.swing.JComboBox;
-
 public class ReadTab extends Panel
 {
   /* Variable that makes eclipse shut up */

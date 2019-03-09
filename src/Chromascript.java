@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 
 public class Chromascript
 {
+  /**/
   private int id[];
   private int idWidth;
   private final byte idHeight = 2;
@@ -30,43 +31,40 @@ public class Chromascript
   private BufferedImage pageImage;
   private String name;
   
+  /* Class used for finding the little ID squares */
   private class IdSquare
   {
     public int pointAX;
     public int pointAY;
     public int pointBX;
     public int pointBY;
-    public boolean finished = false;
     
+    /* Gets the distance between point A and B */
     public double getDiagonal()
     {
       return Math.hypot(pointBX-pointAX, pointBY-pointAY);
     }
     
+    /* Gets the length of each side */
     public double getSide()
     {
       return Math.sqrt(Math.pow(getDiagonal(), 2) / 2);
     }
-    
-    public String toString()
-    {
-      return Integer.toString(pointAX) + " " + Integer.toString(pointAY)
-      + " " + Integer.toString(pointBX) + " " + Integer.toString(pointBY)
-      + " " + Double.toString(getDiagonal())+ " " + Double.toString(getSide());
-    }
   }
   
+  /* Used to help identify dark spots in the image that may be identifiers */
   private class BrightnessTracker
   {
     private int darkest;
     private int lightest;
-        
+    
     public BrightnessTracker()
     {
       darkest = 0xFFFFFF;
       lightest = 0x000000;
     }
-     
+    
+    /* Gets the average brightness of each color channel */
     private int meanBrightness(int rgb)
     {
       int brightness = (rgb & 0xFF) + ((rgb >>= 8) & 0xFF) + ((rgb >>= 8) & 0xFF);

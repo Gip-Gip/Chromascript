@@ -1,15 +1,13 @@
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-
 /*
  * ReadButton.java of Chromascript,
  * the high-density paper-based data storage program
  *
  * by Charles Thompson, do not distribute!
  */
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JFrame;
 
 public class ReadButton extends JFrame implements ActionListener
 {
